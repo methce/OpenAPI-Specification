@@ -7,7 +7,7 @@ info:
 servers:
   - url: https://api-sysducash.ducash.com.br/api/v1
 tags:
-  - name: parceiros
+  - name: Parceiros
 paths:
   /parceiros:
     get:
@@ -72,7 +72,7 @@ paths:
   /parceiros/register:
     post:
       tags:
-        - parceiros
+        - Parceiros
       operationId: CreatePartnerUser
       parameters:
         - name: cnpj
