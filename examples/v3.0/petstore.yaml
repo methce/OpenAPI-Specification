@@ -1,113 +1,201 @@
-openapi: "3.0.0"
+openapi: 3.0.3
 info:
-  version: 1.0.0
-  title: Swagger Petstore
-  license:
-    name: MIT
+  title: WalletAPI -> SysDucash
+
+  version: 1.0.11
+
 servers:
-  - url: http://petstore.swagger.io/v1
+  - url: https://api-sysducash.ducash.com.br/api/v1
+tags:
+  - name: parceiros
 paths:
-  /pets:
+  /parceiros:
     get:
-      summary: List all pets
-      operationId: listPets
       tags:
-        - pets
+        - Parceiros
+      summary: Lista parceiros
+      description: Retorna uma lista de parceiros baseada em um filtro
       parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 100)
+        - in: query
+          name: lat
+          description: Latitude da cidade
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: lng
+          description: Longitude da cidade
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: page
+          description: Pagina da lista dos objetos
           required: false
           schema:
             type: integer
-            maximum: 100
-            format: int32
-      responses:
-        '200':
-          description: A paged array of pets
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
-          content:
-            application/json:    
-              schema:
-                $ref: "#/components/schemas/Pets"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-    post:
-      summary: Create a pet
-      operationId: createPets
-      tags:
-        - pets
-      responses:
-        '201':
-          description: Null response
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /pets/{petId}:
-    get:
-      summary: Info for a specific pet
-      operationId: showPetById
-      tags:
-        - pets
-      parameters:
-        - name: petId
-          in: path
-          required: true
-          description: The id of the pet to retrieve
+        - in: query
+          name: size
+          description: O tamanho da lista de objetos
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: city
+          description: O ID (IBGE) da cidade
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: state
+          description: A Sigla do estado do parceiro
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: segmento
+          description: Id do segmento dos parceiros
+          schema:
+            type: integer
+        - in: query
+          name: name
+          description: Nome do parceiro
           schema:
             type: string
       responses:
-        '200':
-          description: Expected response to a valid request
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pet"
-        default:
-          description: unexpected error
+                $ref: "#/components/schemas/ParceirosPaginado"
+  /parceiros/register:
+    post:
+      tags:
+        - parceiros
+      operationId: CreatePartnerUser
+      parameters:
+        - name: cnpj
+          in: query
+          description: string contendo o objeto com o CNPJ do parceiro
+          required: true
+          explode: false
+          schema:
+            type: string
+            default: { cnpj: XXX. XXX/0001-XX }
+      responses:
+        "200":
+          description: Successful operation
+  /parceiros/lista:
+    get:
+      tags:
+        - Parceiros
+      summary: Lista parceiros
+      description: Retorna uma lista de parceiros baseada em um filtro
+      parameters:
+        - in: query
+          name: segmento
+          description: Ids dos parceiros a serem listados
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/ParceirosListado"
 components:
   schemas:
-    Pet:
+    ParceirosPaginado:
+      type: object
+      properties:
+        perPage:
+          type: integer
+        page:
+          type: integer
+        total:
+          type: integer
+        lastPage:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Parceiro"
+    ParceirosListado:
+      type: object
+      properties:
+        Data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Parceiro"
+    Parceiro:
       type: object
       required:
-        - id
-        - name
+        [
+          Id,
+          Cnpj,
+          IdCompany,
+          Name,
+          Logo,
+          HomePosition,
+          HasLimit,
+          Active,
+          PartnerNetwork,
+          DiscountPolicy,
+          PartnerSite,
+          IdSegment,
+          Special,
+          IsFavorite,
+          PayWithDucash,
+          City,
+          DiscountFilter,
+        ]
       properties:
-        id:
+        Id:
           type: integer
-          format: int64
-        name:
+        Cnpj:
           type: string
-        tag:
-          type: string
-    Pets:
-      type: array
-      maxItems: 100
-      items:
-        $ref: "#/components/schemas/Pet"
-    Error:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
+        IdCompany:
           type: integer
-          format: int32
-        message:
+        Name:
           type: string
+        Logo:
+          type: string
+        HomePosition:
+          type: integer
+        HasLimit:
+          type: boolean
+        Active:
+          type: boolean
+        PartnerNetwork:
+          type: boolean
+        DiscountPolicy:
+          type: string
+        PartnerSite:
+          type: string
+        IdSegment:
+          type: integer
+        Discount:
+          type: integer
+        Distance:
+          type: integer
+        Special:
+          type: boolean
+        IsFavorite:
+          type: boolean
+        PayWithDucash:
+          type: boolean
+        City:
+          type: string
+        DiscountFilter:
+          type: string
+  requestBodies:
+    Partner:
+      description: CNPJ do parceiro
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Partner"
